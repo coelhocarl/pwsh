@@ -1,5 +1,7 @@
 <#
+
 Ativa o bitlocker se o dispositivo tiver o TPM habilitado e salva a chave na pasta C:\tmp
+Pode ser utilizado em script de logon e o log redirecionado para outro local. 
 Requer elevação.
 
 #>
@@ -23,10 +25,10 @@ if ($BitVol.volumeStatus -eq 'FullyDecrypted' -and $TPMST -eq 'true') {
 }
 
 elseif ($BitVol.volumeStatus -ne 'FullyDecrypted') {
-echo "Bitlocker já está ativado ou em processo de ativação" >> $log
+    echo "Bitlocker já está ativado ou em processo de ativação" >> $log
 }
 
 else {
-echo "Configurações TPM não suportadas" >> $log
+    echo "Configurações TPM não suportadas" >> $log
 }
 Write-Output "`n--- Execução concluida $(Get-Date -UFormat "%A %d/%m/%Y %T %Z")" >> $log
