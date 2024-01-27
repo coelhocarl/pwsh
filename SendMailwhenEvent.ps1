@@ -8,7 +8,7 @@ Defina os parametros $username, $password e To
 
 #>
 
-$subject = (Get-WinEvent -LogName Application | ? {$_.id -eq 12325} | Select-Object -First 1 -ExpandProperty Message)
+$message = (Get-WinEvent -LogName Application | ? {$_.id -eq 12325} | Select-Object -First 1 -ExpandProperty Message)
 $username = 'your_gmail@gmail.com'
 $password = (ConvertTo-SecureString "password app here" -AsPlainText -Force)
 $credential = New-Object System.Management.Automation.PSCredential -ArgumentList $username, $password
@@ -21,6 +21,6 @@ $sendMailHash = @{
    From = $username
    To = 'destinatario_here@outlook.com'
    Subject = 'Exceeded the quota threshold'
-   Body = [String]$subject
+   Body = [String]$message
 }
 Send-MailMessage @sendMailHash
