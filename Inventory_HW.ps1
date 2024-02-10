@@ -28,7 +28,7 @@ $biosRelease = (Get-WmiObject Win32_Bios).ReleaseDate
 $sn = (Get-WmiObject Win32_Bios).SerialNumber
 
 # Index
-# Name,IP,Processor,RAM,DiskTotal,DiskFree,SO,Build,Language,Arch,Manufacturer,Model,BIOS,BIOSRelease,SN
+# Name,IP,Processor,RAM,DiskCTotal,DiskCFree,SO,Build,Language,Arch,Manufacturer,Model,BIOS,BIOSRelease,SN
 "$name;$ip;$processor;$ram;$diskCapacity;$diskFree;$so;$build;$language;$arch;$manufacturer;$model;$bios;$biosRelease;$sn" | Out-File $file'.dev.txt'
 
 $Apps = @()
