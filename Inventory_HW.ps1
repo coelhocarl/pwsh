@@ -26,10 +26,11 @@ $model = (Get-WMIObject Win32_ComputerSystem).Model
 $bios = (Get-WmiObject Win32_Bios).Name
 $biosRelease = (Get-WmiObject Win32_Bios).ReleaseDate
 $sn = (Get-WmiObject Win32_Bios).SerialNumber
+$last = Get-Date -Format "yyyyMMddHHmm"
 
 # Index
 # Name,IP,Processor,RAM,DiskCTotal,DiskCFree,SO,Build,Language,Arch,Manufacturer,Model,BIOS,BIOSRelease,SN
-"$name;$ip;$processor;$ram;$diskCapacity;$diskFree;$so;$build;$language;$arch;$manufacturer;$model;$bios;$biosRelease;$sn" | Out-File $file'.dev.txt'
+"$name;$ip;$processor;$ram;$diskCapacity;$diskFree;$so;$build;$language;$arch;$manufacturer;$model;$bios;$biosRelease;$sn;$last" | Out-File $file'.dev.txt'
 
 $Apps = @()
 $Apps += Get-CimInstance Win32_InstalledWin32Program
