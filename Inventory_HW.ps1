@@ -1,54 +1,39 @@
 <#
 
-Script exige elevação 
-Coleta os dados e salva como o nome do computador
-A cada execução os dados são substituidos 
+Basic Inventory
+Requer elevação 
+Last update 2024-02-10
 
 #>
 
-$file = "\\example\share$\$env:computername.txt"
+$file = "\\example\share$\$env:computername"
 
-$invent = @(
-write "-- Inventario gerado $(get-date -Format "yyyy-MM-dd HH:mm:ss")"
-write ""
+$name = (Get-WMIObject Win32_ComputerSystem).Name
+$ip = Get-WMIObject Win32_NetworkAdapterConfiguration | Where-Object { $_.IPAddress } | Select-Object -expand IPAddress | Where-Object { $_ -like '1*.*' }
+$processor = (Get-WmiObject Win32_Processor).Name
+$ramb = Get-WMIObject Win32_PhysicalMemory | Select-Object -expand Capacity
+    [int]$ram = $ramb / 1024 / 1024 / 1024
+$diskCapacityb = Get-WmiObject Win32_LogicalDisk | Where-Object {$_.DeviceID -like 'c:'} | Select-Object -expand Size
+    [int]$diskCapacity = $diskCapacityb / 1024 / 1024 / 1024
+$diskFreeb = Get-WmiObject Win32_LogicalDisk | Where-Object {$_.DeviceID -like 'c:'} | Select-Object -expand FreeSpace
+    [int]$diskFree = $diskFreeb / 1024 / 1024 / 1024
+$so = (Get-WmiObject Win32_OperatingSystem).Caption
+$build = (Get-WmiObject Win32_OperatingSystem).Version
+$language = (Get-WMIObject Win32_OperatingSystem).OSLanguage
+$arch = (Get-WmiObject Win32_OperatingSystem).OSArchitecture
+$manufacturer = (Get-WMIObject Win32_ComputerSystem).Manufacturer
+$model = (Get-WMIObject Win32_ComputerSystem).Model
+$bios = (Get-WmiObject Win32_Bios).Name
+$biosRelease = (Get-WmiObject Win32_Bios).ReleaseDate
+$sn = (Get-WmiObject Win32_Bios).SerialNumber
 
-write "-------- Programas instalados --------"
-Get-WmiObject Win32_InstalledWin32Program | Select Name,Version | ft -autosize
-write ""
+# Index
+# Name,IP,Processor,RAM,DiskTotal,DiskFree,SO,Build,Language,Arch,Manufacturer,Model,BIOS,BIOSRelease,SN
+"$name;$ip;$processor;$ram;$diskCapacity;$diskFree;$so;$build;$language;$arch;$manufacturer;$model;$bios;$biosRelease;$sn" | Out-File $file'.dev.txt'
 
-write "-------- Outras informacoes --------"
-(Get-WMIObject Win32_ComputerSystem).Name
-Get-WMIObject Win32_NetworkAdapterConfiguration | ? { $_.IPAddress } | select -expand IPAddress | ? { $_ -like '1*.*' }
-(Get-WmiObject Win32_Processor).Name
-Get-WMIObject Win32_PhysicalMemory | select -expand Capacity
-Get-WmiObject Win32_LogicalDisk | ? {$_.DriveType -eq 3} | select -expand Size
-Get-WmiObject Win32_LogicalDisk | ? {$_.DriveType -eq 3} | select -expand FreeSpace
-(Get-WmiObject Win32_OperatingSystem).Caption
-(Get-WmiObject Win32_OperatingSystem).OSArchitecture
-(Get-WMIObject Win32_ComputerSystem).Manufacturer
-(Get-WMIObject Win32_ComputerSystem).Model
-(Get-WMIObject Win32_OperatingSystem).OSLanguage
-(Get-WmiObject Win32_Bios).Name
-(Get-WmiObject Win32_Bios).SerialNumber
-(Get-WmiObject Win32_Bios).ReleaseDate
-write ""
+$Apps = @()
+$Apps += Get-CimInstance Win32_InstalledWin32Program
+$Apps += Get-CimInstance Win32_InstalledStoreProgram
+$Apps | Format-Table -HideTableHeaders Name,Version | Out-File $file'.apps.txt'
 
-write "-------- Folders --------"
-ls C:\ -Depth 1 | Select FullName, LastAccessTime, LastWriteTime
-
-)
-$invent | Out-File $file
-
-write "-- Inventario finalizado $(get-date -Format "yyyy-MM-dd HH:mm:ss")" | Out-File -Append $file
-
-
-<#
-... 
-
-Codigo de idiomas
-https://learn.microsoft.com/en-us/deployoffice/office2016/language/language-identifiers-optionstate-id-values
-Conversão de bytes 
-em MB =bytes
-
-
-#>
+Get-ChildItem C:\ -Depth 1 | Format-Table -HideTableHeaders FullName, LastAccessTime, LastWriteTime, Length | Out-File $file'.folders.txt'
